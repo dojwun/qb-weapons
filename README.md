@@ -3,7 +3,7 @@ All Credits to go to the original qbcore-framework repository
 
 
 ## [W.I.P] Adding ammo to database [W.I.P]
-
+<!-- 
 - Be sure to also import the playerammo.sql provided
 
 - You can also just add the line of code below to your "weapons:server:AddWeaponAmmo" event in qb-weapons/server/main.lua
@@ -29,5 +29,5 @@ AddEventHandler('weapons:server:AddWeaponAmmo', function(CurrentWeaponData, amou
         Player.Functions.SetInventory(Player.PlayerData.items, true)
     end
 end)
-```
+``` -->
 
