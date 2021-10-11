@@ -3,6 +3,9 @@ All Credits to go to the original qbcore-framework repository
 
 
 ## [W.I.P] Adding ammo to database [W.I.P]
+
+- Mostly used for getting ammo values in qb-inventory tool tip
+
 <!-- 
 - Be sure to also import the playerammo.sql provided
 
