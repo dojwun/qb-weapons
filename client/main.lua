@@ -96,8 +96,7 @@ Citizen.CreateThread(function()
             if ammo > 1 then
                 TriggerServerEvent("weapons:server:UpdateWeaponAmmo", CurrentWeaponData, tonumber(ammo))
             else
-                QBCore.Functions.Notify("No Ammo!", "error")
-
+                --QBCore.Functions.Notify("No Ammo!", "error")
                 TriggerEvent('inventory:client:CheckWeapon')
                 TriggerServerEvent("weapons:server:UpdateWeaponAmmo", CurrentWeaponData, 0)
             end
