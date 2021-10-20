@@ -9,21 +9,16 @@ AddEventHandler('weapons:server:AddWeaponAmmo', function(CurrentWeaponData, amou
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local amount = tonumber(amount)
-    
-    local weaponInfo = QBCore.Shared.Weapons[weapon]
-    local serieNumber = nil
-    if weaponInfo ~= nil then 
-        local weaponItem = Player.Functions.GetItemByName(weaponInfo["name"])
-        if weaponItem ~= nil then
-            if weaponItem.info ~= nil and  weaponItem.info ~= "" then 
-                serieNumber = weaponItem.info.serie
+
+    if CurrentWeaponData ~= nil then
+        exports.oxmysql:fetch('SELECT * FROM playerammo WHERE serial_number = ?', {Player.PlayerData.items[CurrentWeaponData.slot].info.serie}, function(result)
+            if result[1] == nil then
+                exports.oxmysql:insert('INSERT INTO playerammo (citizenid, ammo, serial_number) VALUES (?, ?, ?)',{Player.PlayerData.citizenid, amount, Player.PlayerData.items[CurrentWeaponData.slot].info.serie})
+            else
+                exports.oxmysql:execute('UPDATE playerammo SET ammo = ? WHERE serial_number= ?', {amount, Player.PlayerData.items[CurrentWeaponData.slot].info.serie})
             end
-        end
-    end
+        end)
 
-    exports.oxmysql:insert('INSERT INTO playerammo (citizenid, ammo, serial_number) VALUES (?, ?, ?)',{Player.PlayerData.citizenid, amount,serieNumber})
-
-    if CurrentWeaponData ~= nil then 
         if Player.PlayerData.items[CurrentWeaponData.slot] ~= nil then
             Player.PlayerData.items[CurrentWeaponData.slot].info.ammo = amount 
         end
@@ -31,16 +26,22 @@ AddEventHandler('weapons:server:AddWeaponAmmo', function(CurrentWeaponData, amou
     end
 end)
 
-
 RegisterServerEvent("weapons:server:UpdateWeaponAmmo")
 AddEventHandler('weapons:server:UpdateWeaponAmmo', function(CurrentWeaponData, amount)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local amount = tonumber(amount)
 
-    exports.oxmysql:execute('UPDATE playerammo SET ammo = ? WHERE citizenid= ?', {amount, Player.PlayerData.citizenid})
-
     if CurrentWeaponData ~= nil then
+
+        exports.oxmysql:fetch('SELECT * FROM playerammo WHERE serial_number = ?', {Player.PlayerData.items[CurrentWeaponData.slot].info.serie}, function(result)
+            if result[1] ~= nil then
+                exports.oxmysql:execute('UPDATE playerammo SET ammo = ? WHERE serial_number= ?', {amount, Player.PlayerData.items[CurrentWeaponData.slot].info.serie})
+            else
+                exports.oxmysql:insert('INSERT INTO playerammo (citizenid, ammo, serial_number) VALUES (?, ?, ?)',{Player.PlayerData.citizenid, amount, Player.PlayerData.items[CurrentWeaponData.slot].info.serie})
+            end
+        end)
+        
         if Player.PlayerData.items[CurrentWeaponData.slot] ~= nil then
             Player.PlayerData.items[CurrentWeaponData.slot].info.ammo = amount
         end
