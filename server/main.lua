@@ -9,22 +9,27 @@ AddEventHandler('weapons:server:AddWeaponAmmo', function(CurrentWeaponData, amou
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local amount = tonumber(amount)
-
-    if CurrentWeaponData ~= nil then
-        exports.oxmysql:fetch('SELECT * FROM playerammo WHERE serial_number = ?', {Player.PlayerData.items[CurrentWeaponData.slot].info.serie}, function(result)
-            if result[1] == nil then
-                exports.oxmysql:insert('INSERT INTO playerammo (citizenid, ammo, serial_number) VALUES (?, ?, ?)',{Player.PlayerData.citizenid, amount, Player.PlayerData.items[CurrentWeaponData.slot].info.serie})
-            else
-                exports.oxmysql:execute('UPDATE playerammo SET ammo = ? WHERE serial_number= ?', {amount, Player.PlayerData.items[CurrentWeaponData.slot].info.serie})
+    
+    local weaponInfo = QBCore.Shared.Weapons[weapon]
+    local serieNumber = nil
+    if weaponInfo ~= nil then 
+        local weaponItem = Player.Functions.GetItemByName(weaponInfo["name"])
+        if weaponItem ~= nil then
+            if weaponItem.info ~= nil and  weaponItem.info ~= "" then 
+                serieNumber = weaponItem.info.serie
             end
-        end)
+        end
+    end
 
+    if CurrentWeaponData ~= nil then 
+        exports.oxmysql:insert('INSERT INTO playerammo (citizenid, ammo, serial_number) VALUES (?, ?, ?)',{Player.PlayerData.citizenid, amount,serieNumber})
         if Player.PlayerData.items[CurrentWeaponData.slot] ~= nil then
             Player.PlayerData.items[CurrentWeaponData.slot].info.ammo = amount 
         end
         Player.Functions.SetInventory(Player.PlayerData.items, true)
     end
 end)
+
 
 RegisterServerEvent("weapons:server:UpdateWeaponAmmo")
 AddEventHandler('weapons:server:UpdateWeaponAmmo', function(CurrentWeaponData, amount)
@@ -33,21 +38,58 @@ AddEventHandler('weapons:server:UpdateWeaponAmmo', function(CurrentWeaponData, a
     local amount = tonumber(amount)
 
     if CurrentWeaponData ~= nil then
-
-        exports.oxmysql:fetch('SELECT * FROM playerammo WHERE serial_number = ?', {Player.PlayerData.items[CurrentWeaponData.slot].info.serie}, function(result)
-            if result[1] ~= nil then
-                exports.oxmysql:execute('UPDATE playerammo SET ammo = ? WHERE serial_number= ?', {amount, Player.PlayerData.items[CurrentWeaponData.slot].info.serie})
-            else
-                exports.oxmysql:insert('INSERT INTO playerammo (citizenid, ammo, serial_number) VALUES (?, ?, ?)',{Player.PlayerData.citizenid, amount, Player.PlayerData.items[CurrentWeaponData.slot].info.serie})
-            end
-        end)
-        
+        exports.oxmysql:execute('UPDATE playerammo SET ammo = ? WHERE citizenid= ?', {amount, Player.PlayerData.citizenid})
         if Player.PlayerData.items[CurrentWeaponData.slot] ~= nil then
             Player.PlayerData.items[CurrentWeaponData.slot].info.ammo = amount
         end
         Player.Functions.SetInventory(Player.PlayerData.items, true)
     end
 end)
+
+-- RegisterServerEvent("weapons:server:AddWeaponAmmo")
+-- AddEventHandler('weapons:server:AddWeaponAmmo', function(CurrentWeaponData, amount, weapon)
+--     local src = source
+--     local Player = QBCore.Functions.GetPlayer(src)
+--     local amount = tonumber(amount)
+
+--     if CurrentWeaponData ~= nil then
+--         exports.oxmysql:fetch('SELECT * FROM playerammo WHERE serial_number = ?', {Player.PlayerData.items[CurrentWeaponData.slot].info.serie}, function(result)
+--             if result[1] == nil then
+--                 exports.oxmysql:insert('INSERT INTO playerammo (citizenid, ammo, serial_number) VALUES (?, ?, ?)',{Player.PlayerData.citizenid, amount, Player.PlayerData.items[CurrentWeaponData.slot].info.serie})
+--             else
+--                 exports.oxmysql:execute('UPDATE playerammo SET ammo = ? WHERE serial_number= ?', {amount, Player.PlayerData.items[CurrentWeaponData.slot].info.serie})
+--             end
+--         end)
+
+--         if Player.PlayerData.items[CurrentWeaponData.slot] ~= nil then
+--             Player.PlayerData.items[CurrentWeaponData.slot].info.ammo = amount 
+--         end
+--         Player.Functions.SetInventory(Player.PlayerData.items, true)
+--     end
+-- end)
+
+-- RegisterServerEvent("weapons:server:UpdateWeaponAmmo")
+-- AddEventHandler('weapons:server:UpdateWeaponAmmo', function(CurrentWeaponData, amount)
+--     local src = source
+--     local Player = QBCore.Functions.GetPlayer(src)
+--     local amount = tonumber(amount)
+
+--     if CurrentWeaponData ~= nil then
+
+--         exports.oxmysql:fetch('SELECT * FROM playerammo WHERE serial_number = ?', {Player.PlayerData.items[CurrentWeaponData.slot].info.serie}, function(result)
+--             if result[1] ~= nil then
+--                 exports.oxmysql:execute('UPDATE playerammo SET ammo = ? WHERE serial_number= ?', {amount, Player.PlayerData.items[CurrentWeaponData.slot].info.serie})
+--             else
+--                 exports.oxmysql:insert('INSERT INTO playerammo (citizenid, ammo, serial_number) VALUES (?, ?, ?)',{Player.PlayerData.citizenid, amount, Player.PlayerData.items[CurrentWeaponData.slot].info.serie})
+--             end
+--         end)
+        
+--         if Player.PlayerData.items[CurrentWeaponData.slot] ~= nil then
+--             Player.PlayerData.items[CurrentWeaponData.slot].info.ammo = amount
+--         end
+--         Player.Functions.SetInventory(Player.PlayerData.items, true)
+--     end
+-- end)
 
 QBCore.Functions.CreateCallback("weapon:server:GetWeaponAmmo", function(source, cb, WeaponData)
     local Player = QBCore.Functions.GetPlayer(source)
