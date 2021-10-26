@@ -2,9 +2,9 @@
 All Credits to go to the original qbcore-framework repository
 
 ## *Be Advised* [W.I.P] Adding ammo to database [W.I.P]
-- w.i.p, w.i.p, w.i.p
+- W.i.p, w.i.p, w.i.p
 - Spams sql, dont use if you cry
-- there is an option to set Config.playerammo = false/true if you are using my version of qb-inventory
+- There is an option to set Config.playerammo = false/true if you are using my version of qb-inventory
 - Mostly used for getting ammo values in qb-inventory tool tip
 
 <!-- 
