@@ -1,3 +1,7 @@
+
+local QBCore = exports['qb-core']:GetCoreObject()
+
+
 local isLoggedIn = true
 local CurrentWeaponData = {}
 local CurrentItemData = {}
