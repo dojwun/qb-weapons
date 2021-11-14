@@ -1,3 +1,7 @@
+
+local QBCore = exports['qb-core']:GetCoreObject()
+
+
 local WeaponAmmo = {}
 
 QBCore.Functions.CreateCallback("weapons:server:GetConfig", function(source, cb)
