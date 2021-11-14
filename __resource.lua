@@ -14,10 +14,6 @@ client_scripts {
 
 }
 
-shared_scripts {
-	'@qb-core/import.lua'
-}
-
 files {
     'weaponsnspistol.meta',
 }
