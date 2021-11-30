@@ -1,10 +1,11 @@
 # qb-weapons
 All Credits to go to the original qbcore-framework repository
 
-### *Mostly used for getting ammo values in qb-inventory tool tip*
+### Mostly used for getting ammo values in ***[qb-inventory tooltip](https://i.imgur.com/6mlaYgJ.png)***
 
 - Spams sql, dont use if you cry
-- There is an option to set Config.playerammo xxxx= false/true if you are using my version of qb-inventory
+
+- There is an option to set Config.playerammo = false/true if you are using my version of **[qb-inventory](https://github.com/dojwun/qb-inventory)**
 
 
 
