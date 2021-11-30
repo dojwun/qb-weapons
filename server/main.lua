@@ -21,7 +21,14 @@ AddEventHandler('weapons:server:AddWeaponAmmo', function(CurrentWeaponData, amou
             end
         end
     end
-    exports.oxmysql:insert('INSERT INTO playerammo (citizenid, ammo, serial_number) VALUES (?, ?, ?)',{Player.PlayerData.citizenid, amount,serieNumber})
+        -- exports.oxmysql:insert('INSERT INTO playerammo (citizenid, ammo, serial_number) VALUES (?, ?, ?)',{Player.PlayerData.citizenid, amount,serieNumber})
+    exports.oxmysql:fetch('SELECT * FROM playerammo WHERE serial_number = ?', {Player.PlayerData.items[CurrentWeaponData.slot].info.serie}, function(result)
+        if result[1] == nil then
+            exports.oxmysql:insert('INSERT INTO playerammo (citizenid, ammo, serial_number) VALUES (?, ?, ?)',{Player.PlayerData.citizenid, amount, Player.PlayerData.items[CurrentWeaponData.slot].info.serie})
+        else
+            exports.oxmysql:execute('UPDATE playerammo SET ammo = ? WHERE serial_number= ?', {amount, Player.PlayerData.items[CurrentWeaponData.slot].info.serie})
+        end
+    end)
 
     if CurrentWeaponData ~= nil then 
         if Player.PlayerData.items[CurrentWeaponData.slot] ~= nil then
@@ -37,7 +44,14 @@ AddEventHandler('weapons:server:UpdateWeaponAmmo', function(CurrentWeaponData, a
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local amount = tonumber(amount)
-    exports.oxmysql:execute('UPDATE playerammo SET ammo = ? WHERE citizenid= ?', {amount, Player.PlayerData.citizenid})
+        -- exports.oxmysql:execute('UPDATE playerammo SET ammo = ? WHERE citizenid= ?', {amount, Player.PlayerData.citizenid})
+    exports.oxmysql:fetch('SELECT * FROM playerammo WHERE serial_number = ?', {Player.PlayerData.items[CurrentWeaponData.slot].info.serie}, function(result)
+        if result[1] ~= nil then
+            exports.oxmysql:execute('UPDATE playerammo SET ammo = ? WHERE serial_number= ?', {amount, Player.PlayerData.items[CurrentWeaponData.slot].info.serie})
+        else
+            exports.oxmysql:insert('INSERT INTO playerammo (citizenid, ammo, serial_number) VALUES (?, ?, ?)',{Player.PlayerData.citizenid, amount, Player.PlayerData.items[CurrentWeaponData.slot].info.serie})
+        end
+    end)
 
     if CurrentWeaponData ~= nil then 
         if Player.PlayerData.items[CurrentWeaponData.slot] ~= nil then
