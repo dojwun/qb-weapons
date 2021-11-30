@@ -1,7 +1,4 @@
-
 local QBCore = exports['qb-core']:GetCoreObject()
-
-
 local WeaponAmmo = {}
 
 QBCore.Functions.CreateCallback("weapons:server:GetConfig", function(source, cb)
@@ -24,9 +21,9 @@ AddEventHandler('weapons:server:AddWeaponAmmo', function(CurrentWeaponData, amou
             end
         end
     end
+    exports.oxmysql:insert('INSERT INTO playerammo (citizenid, ammo, serial_number) VALUES (?, ?, ?)',{Player.PlayerData.citizenid, amount,serieNumber})
 
     if CurrentWeaponData ~= nil then 
-        exports.oxmysql:insert('INSERT INTO playerammo (citizenid, ammo, serial_number) VALUES (?, ?, ?)',{Player.PlayerData.citizenid, amount,serieNumber})
         if Player.PlayerData.items[CurrentWeaponData.slot] ~= nil then
             Player.PlayerData.items[CurrentWeaponData.slot].info.ammo = amount 
         end
@@ -40,9 +37,9 @@ AddEventHandler('weapons:server:UpdateWeaponAmmo', function(CurrentWeaponData, a
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local amount = tonumber(amount)
+    exports.oxmysql:execute('UPDATE playerammo SET ammo = ? WHERE citizenid= ?', {amount, Player.PlayerData.citizenid})
 
-    if CurrentWeaponData ~= nil then
-        exports.oxmysql:execute('UPDATE playerammo SET ammo = ? WHERE citizenid= ?', {amount, Player.PlayerData.citizenid})
+    if CurrentWeaponData ~= nil then 
         if Player.PlayerData.items[CurrentWeaponData.slot] ~= nil then
             Player.PlayerData.items[CurrentWeaponData.slot].info.ammo = amount
         end
@@ -98,17 +95,17 @@ end)
 QBCore.Functions.CreateCallback("weapon:server:GetWeaponAmmo", function(source, cb, WeaponData)
     local Player = QBCore.Functions.GetPlayer(source)
     local retval = 0
-    if WeaponData ~= nil then
-        if Player ~= nil then
+    if WeaponData then
+        if Player then
             local ItemData = Player.Functions.GetItemBySlot(WeaponData.slot)
-            if ItemData ~= nil then
-                retval = ItemData.info.ammo ~= nil and ItemData.info.ammo or 0
-                print("Retrived "..retval.." Bullets for "..GetPlayerName(source).." CID: "..Player.PlayerData.citizenid)
+            if ItemData then
+                retval = ItemData.info.ammo and ItemData.info.ammo or 0
             end
         end
     end
     cb(retval)
 end)
+
 
 function IsWeaponBlocked(WeaponName)
     local retval = false
@@ -121,17 +118,15 @@ function IsWeaponBlocked(WeaponName)
     return retval
 end
 
-RegisterServerEvent('weapons:server:UpdateWeaponQuality')
-AddEventHandler('weapons:server:UpdateWeaponQuality', function(data, RepeatAmount)
+RegisterNetEvent('weapons:server:UpdateWeaponQuality', function(data, RepeatAmount)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local WeaponData = QBCore.Shared.Weapons[GetHashKey(data.name)]
     local WeaponSlot = Player.PlayerData.items[data.slot]
     local DecreaseAmount = Config.DurabilityMultiplier[data.name]
-
-    if WeaponSlot ~= nil then
+    if WeaponSlot then
         if not IsWeaponBlocked(WeaponData.name) then
-            if WeaponSlot.info.quality ~= nil then
+            if WeaponSlot.info.quality then
                 for i = 1, RepeatAmount, 1 do
                     if WeaponSlot.info.quality - DecreaseAmount > 0 then
                         WeaponSlot.info.quality = WeaponSlot.info.quality - DecreaseAmount
@@ -157,7 +152,6 @@ AddEventHandler('weapons:server:UpdateWeaponQuality', function(data, RepeatAmoun
             end
         end
     end
-
     Player.Functions.SetInventory(Player.PlayerData.items, true)
 end)
 
@@ -168,8 +162,6 @@ AddEventHandler('weapons:server:UpdateItemQuality', function(data)
     local ItemSlot = Player.PlayerData.items[data.slot]
     local DecreaseAmount = Config.DurabilityMultiplier[data.name]
     local date = os.time(os.date("!*t"))
-    print("weapons:server:UpdateItemQuality")
-
     if Config.DurabilityMultiplier[data.name] ~= nil then
         if ItemSlot.info.quality ~= nil then
             if ItemSlot.info.quality - DecreaseAmount > 0 then
@@ -185,16 +177,14 @@ AddEventHandler('weapons:server:UpdateItemQuality', function(data)
 end)
 
 
-RegisterServerEvent("weapons:server:SetWeaponQuality")
-AddEventHandler("weapons:server:SetWeaponQuality", function(data, hp)
+RegisterNetEvent("weapons:server:SetWeaponQuality", function(data, hp)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    local WeaponData = QBCore.Shared.Weapons[GetHashKey(data.name)]
     local WeaponSlot = Player.PlayerData.items[data.slot]
-    local DecreaseAmount = Config.DurabilityMultiplier[data.name]
     WeaponSlot.info.quality = hp
     Player.Functions.SetInventory(Player.PlayerData.items, true)
 end)
+
 
 RegisterServerEvent("weapons:server:SetItemQuality")
 AddEventHandler("weapons:server:SetItemQuality", function(data, hp)
@@ -204,7 +194,6 @@ AddEventHandler("weapons:server:SetItemQuality", function(data, hp)
     local DecreaseAmount = Config.DurabilityMultiplier[data.name]
     itemSlot = slot
     itemSlot.info.quality = hp
-    print("weapons:server:SetItemQuality")
     Player.Functions.SetInventory(Player.PlayerData.items)
 end)
 
@@ -263,7 +252,7 @@ QBCore.Functions.CreateCallback("weapons:server:RepairWeapon", function(source, 
         end
     else
         TriggerClientEvent('QBCore:Notify', src, "You don't have a weapon in your hands..", "error")
-        TriggerClientEvent('weapons:client:SetCurrentWeapon', src, {}, false)
+        TriggerClientEvent('weapons:client:SetCurrentWeapon', src, {}, false) 
         cb(false)
     end
 end)
