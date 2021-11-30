@@ -2,24 +2,27 @@ resource_manifest_version "44febabe-d386-4d18-afbe-5e627f4af937"
 
 description 'QB:Weapons'
 
+ui_page 'html/index.html'
+
+
 server_scripts {
-    "config.lua",
     "server/main.lua",
 }
 
 client_scripts {
-	"config.lua",
-	"client/main.lua",
-    "client/recoil.lua",
-
+	"client/*.lua"
 }
 
-files {
-    'weaponsnspistol.meta',
+shared_scripts {
+    "config.lua",
 }
-
-data_file 'WEAPONINFO_FILE_PATCH' 'weaponsnspistol.meta'
 
 exports {
 	'CanShoot',
 } 
+
+files {
+    'html/index.html',
+    'html/js/script.js',
+    'html/css/style.css',
+}
