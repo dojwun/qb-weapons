@@ -1,43 +1,42 @@
-
 local QBCore = exports['qb-core']:GetCoreObject()
-
-
-local isLoggedIn = true
 local CurrentWeaponData = {}
 local CurrentItemData = {}
 
 local PlayerData = {}
 local CanShoot = true
-
-function DrawText3Ds(x, y, z, text)
-	SetTextScale(0.35, 0.35)
-    SetTextFont(4)
-    SetTextProportional(1)
-    SetTextColour(255, 255, 255, 215)
-    SetTextEntry("STRING")
-    SetTextCentre(true)
-    AddTextComponentString(text)
-    SetDrawOrigin(x,y,z, 0)
-    DrawText(0.0, 0.0)
-    local factor = (string.len(text)) / 370
-    DrawRect(0.0, 0.0+0.0125, 0.017+ factor, 0.03, 0, 0, 0, 75)
-    ClearDrawOrigin()
-end
-
 local MultiplierAmount = 0
 local MultiplierItemAmount = 0
 
-Citizen.CreateThread(function()
+
+CreateThread(function()
     while true do
-        if isLoggedIn then
+        if LocalPlayer.state['isLoggedIn'] then
             local ped = PlayerPedId()
-            if CurrentWeaponData ~= nil and next(CurrentWeaponData) ~= nil then
+            if CurrentWeaponData and next(CurrentWeaponData) then
                 if IsPedShooting(ped) or IsControlJustPressed(0, 24) then
                     if CanShoot then
                         local weapon = GetSelectedPedWeapon(ped)
                         local ammo = GetAmmoInPedWeapon(ped, weapon)
                         if QBCore.Shared.Weapons[weapon]["name"] == "weapon_snowball" then
                             TriggerServerEvent('QBCore:Server:RemoveItem', "snowball", 1)
+                        elseif QBCore.Shared.Weapons[weapon]["name"] == "weapon_pipebomb" then
+                            TriggerServerEvent('QBCore:Server:RemoveItem', "weapon_pipebomb", 1)
+                        elseif QBCore.Shared.Weapons[weapon]["name"] == "weapon_molotov" then
+                            TriggerServerEvent('QBCore:Server:RemoveItem', "weapon_molotov", 1)
+                        elseif QBCore.Shared.Weapons[weapon]["name"] == "weapon_stickybomb" then
+                            TriggerServerEvent('QBCore:Server:RemoveItem', "weapon_stickybomb", 1)
+                        elseif QBCore.Shared.Weapons[weapon]["name"] == "weapon_grenade" then
+                            TriggerServerEvent('QBCore:Server:RemoveItem', "weapon_grenade", 1)
+                        elseif QBCore.Shared.Weapons[weapon]["name"] == "weapon_bzgas" then
+                            TriggerServerEvent('QBCore:Server:RemoveItem', "weapon_bzgas", 1)
+                        elseif QBCore.Shared.Weapons[weapon]["name"] == "weapon_proxmine" then
+                            TriggerServerEvent('QBCore:Server:RemoveItem', "weapon_proxmine", 1)
+                        elseif QBCore.Shared.Weapons[weapon]["name"] == "weapon_ball" then
+                            TriggerServerEvent('QBCore:Server:RemoveItem', "weapon_ball", 1)
+                        elseif QBCore.Shared.Weapons[weapon]["name"] == "weapon_smokegrenade" then
+                            TriggerServerEvent('QBCore:Server:RemoveItem', "weapon_smokegrenade", 1)
+                        elseif QBCore.Shared.Weapons[weapon]["name"] == "weapon_flare" then
+                            TriggerServerEvent('QBCore:Server:RemoveItem', "weapon_flare", 1)
                         else
                             if ammo > 0 then
                                 MultiplierAmount = MultiplierAmount + 1
@@ -45,40 +44,64 @@ Citizen.CreateThread(function()
                         end
                     else
 			            local weapon = GetSelectedPedWeapon(ped)
-                        if weapon == -1569615261 then
-                        else
+                        if weapon ~= -1569615261 then
                             TriggerEvent('inventory:client:CheckWeapon', QBCore.Shared.Weapons[weapon]["name"])
-                            QBCore.Functions.Notify("This weapon is broken and can not be used..", "error")
-                            print(GetSelectedPedWeapon(PlayerPedId()))
+                            QBCore.Functions.Notify("This weapon is broken and can not be used.", "error")
                             MultiplierAmount = 0
                         end
                     end
                 end
             end
         end
-        Citizen.Wait(0)
+        Wait(1)
     end
 end)
 
-Citizen.CreateThread(function()
+CreateThread(function()
+    while true do
+        Wait(500)
+        if LocalPlayer.state.isLoggedIn then
+            if Config.Crosshair then
+                if IsPedArmed(PlayerPedId(), 6) then
+                    SendNUIMessage({
+                        action = "toggle",
+                        show = IsPlayerFreeAiming(PlayerId()),
+                    })
+                else
+                    SendNUIMessage({
+                        action = "toggle",
+                        show = false,
+                    })
+                    Wait(250)
+                end
+            end
+        end
+    end
+end)
+
+CreateThread(function()
     while true do
         local ped = PlayerPedId()
         local player = PlayerId()
         local weapon = GetSelectedPedWeapon(ped)
         local ammo = GetAmmoInPedWeapon(ped, weapon)
 
-        if ammo == 1 then
-            DisableControlAction(0, 24, true) -- Attack
-            DisableControlAction(0, 257, true) -- Attack 2
-            if IsPedInAnyVehicle(ped, true) then
-                SetPlayerCanDoDriveBy(player, false)
+        if IsPedArmed(ped, 6) then
+            if ammo == 1 then
+                DisableControlAction(0, 24, true) -- Attack
+                DisableControlAction(0, 257, true) -- Attack 2
+                if IsPedInAnyVehicle(ped, true) then
+                    SetPlayerCanDoDriveBy(player, false)
+                end
+            else
+                EnableControlAction(0, 24, true) -- Attack
+                EnableControlAction(0, 257, true) -- Attack 2
+                if IsPedInAnyVehicle(ped, true) then
+                    SetPlayerCanDoDriveBy(player, true)
+                end
             end
         else
-            EnableControlAction(0, 24, true) -- Attack
-			EnableControlAction(0, 257, true) -- Attack 2
-            if IsPedInAnyVehicle(ped, true) then
-                SetPlayerCanDoDriveBy(player, true)
-            end
+            Wait(1000)
         end
 
         if IsPedShooting(ped) then
@@ -87,20 +110,21 @@ Citizen.CreateThread(function()
             end
         end
 
-        Citizen.Wait(0)
+        Wait(0)
     end
 end)
 
-Citizen.CreateThread(function()
+CreateThread(function()
     while true do
         local ped = PlayerPedId()
-        if IsControlJustReleased(0, 24) or IsDisabledControlJustReleased(0, 24) then
+        if IsPedArmed(ped, 7) == 1 and (IsControlJustReleased(0, 24) or IsDisabledControlJustReleased(0, 24)) then
             local weapon = GetSelectedPedWeapon(ped)
             local ammo = GetAmmoInPedWeapon(ped, weapon) 
             if ammo > 1 then
                 TriggerServerEvent("weapons:server:UpdateWeaponAmmo", CurrentWeaponData, tonumber(ammo))
             else
-                --QBCore.Functions.Notify("No Ammo!", "error")
+                QBCore.Functions.Notify("No Ammo!", "error")
+
                 TriggerEvent('inventory:client:CheckWeapon')
                 TriggerServerEvent("weapons:server:UpdateWeaponAmmo", CurrentWeaponData, 0)
             end
@@ -110,30 +134,28 @@ Citizen.CreateThread(function()
                 MultiplierAmount = 0
             end
         end
-        Citizen.Wait(1)
+        Wait(1)
     end
 end)
-
-Citizen.CreateThread(function()
+ 
+CreateThread(function()
     while true do
         if MultiplierItemAmount > 0 then
             TriggerServerEvent("weapons:server:UpdateItemQuality", CurrentItemData)
             --TriggerServerEvent("weapons:server:SetItemQuality", CurrentItemData)
-            Citizen.Wait(1000)
-
+            Wait(1000)
             MultiplierItemAmount = 0
         else
-            Citizen.Wait(1000)
+            Wait(1000)
         end
     end
     Wait(1)
 end)
 
-RegisterNetEvent('weapon:client:AddAmmo')
-AddEventHandler('weapon:client:AddAmmo', function(type, amount, itemData)
+RegisterNetEvent('weapon:client:AddAmmo', function(type, amount, itemData)
     local ped = PlayerPedId()
     local weapon = GetSelectedPedWeapon(ped)
-    if CurrentWeaponData ~= nil then
+    if CurrentWeaponData then
         if QBCore.Shared.Weapons[weapon]["name"] ~= "weapon_unarmed" and QBCore.Shared.Weapons[weapon]["ammotype"] == type:upper() then
             local total = GetAmmoInPedWeapon(ped, weapon)
             local found, maxAmmo = GetMaxAmmo(ped, weapon)
@@ -167,11 +189,8 @@ AddEventHandler('weapon:client:AddAmmo', function(type, amount, itemData)
     end
 end)
 
-RegisterNetEvent('QBCore:Client:OnPlayerLoaded')
-AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
-    isLoggedIn = true
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
     PlayerData = QBCore.Functions.GetPlayerData()
-
     QBCore.Functions.TriggerCallback("weapons:server:GetConfig", function(RepairPoints)
         for k, data in pairs(RepairPoints) do
             Config.WeaponRepairPoints[k].IsRepairing = data.IsRepairing
@@ -180,13 +199,18 @@ AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
     end)
 end)
 
+RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
+    for k, v in pairs(Config.WeaponRepairPoints) do
+        Config.WeaponRepairPoints[k].IsRepairing = false
+        Config.WeaponRepairPoints[k].RepairingData = {}
+    end
+end)
+
+
 AddEventHandler('onResourceStart', function(resource)
     if resource == GetCurrentResourceName() then
         Wait(1000)
-
-        isLoggedIn = true
         PlayerData = QBCore.Functions.GetPlayerData()
-
         QBCore.Functions.TriggerCallback("weapons:server:GetConfig", function(RepairPoints)
             for k, data in pairs(RepairPoints) do
                 Config.WeaponRepairPoints[k].IsRepairing = data.IsRepairing
@@ -196,8 +220,7 @@ AddEventHandler('onResourceStart', function(resource)
     end
 end)
 
-RegisterNetEvent('weapons:client:SetCurrentWeapon')
-AddEventHandler('weapons:client:SetCurrentWeapon', function(data, bool)
+RegisterNetEvent('weapons:client:SetCurrentWeapon', function(data, bool)
     if data ~= false then
         CurrentWeaponData = data
     else
@@ -211,32 +234,20 @@ AddEventHandler('weapons:client:SetCurrentItem', function(data, bool)
     if data ~= false then
         CurrentItemData = data
         MultiplierItemAmount = 1
-        Citizen.Wait(1000)
+        Wait(1000)
     else
         CurrentItemData = data
     end
     CanUse = bool
 end)
 
-RegisterNetEvent('QBCore:Client:OnPlayerUnload')
-AddEventHandler('QBCore:Client:OnPlayerUnload', function()
-    isLoggedIn = false
-
-    for k, v in pairs(Config.WeaponRepairPoints) do
-        Config.WeaponRepairPoints[k].IsRepairing = false
-        Config.WeaponRepairPoints[k].RepairingData = {}
-    end
-end)
-
-RegisterNetEvent('weapons:client:SetWeaponQuality')
-AddEventHandler('weapons:client:SetWeaponQuality', function(amount)
-    if CurrentWeaponData ~= nil and next(CurrentWeaponData) ~= nil then
+RegisterNetEvent('weapons:client:SetWeaponQuality', function(amount)
+    if CurrentWeaponData and next(CurrentWeaponData) then
         TriggerServerEvent("weapons:server:SetWeaponQuality", CurrentWeaponData, amount)
     end
 end)
 
-RegisterNetEvent('weapons:client:SetItemQuality')
-AddEventHandler('weapons:client:SetItemQuality', function(amount)
+RegisterNetEvent('weapons:client:SetItemQuality', function(amount)
     if CurrentItemData ~= true then
         MultiplierItemAmount = 1
         TriggerServerEvent("weapons:server:SetItemQuality", CurrentItemData, amount)
@@ -244,7 +255,7 @@ AddEventHandler('weapons:client:SetItemQuality', function(amount)
 end)
 
 
-Citizen.CreateThread(function()
+CreateThread(function()
     while true do
         if isLoggedIn then
             local inRange = false
@@ -307,49 +318,59 @@ Citizen.CreateThread(function()
             end
 
             if not inRange then
-                Citizen.Wait(1000)
+                Wait(1000)
             end
         end
-        Citizen.Wait(3)
+        Wait(3)
     end
 end)
 
-RegisterNetEvent("weapons:client:SyncRepairShops")
-AddEventHandler("weapons:client:SyncRepairShops", function(NewData, key)
+function DrawText3Ds(x, y, z, text)
+	SetTextScale(0.35, 0.35)
+    SetTextFont(4)
+    SetTextProportional(1)
+    SetTextColour(255, 255, 255, 215)
+    SetTextEntry("STRING")
+    SetTextCentre(true)
+    AddTextComponentString(text)
+    SetDrawOrigin(x,y,z, 0)
+    DrawText(0.0, 0.0)
+    local factor = (string.len(text)) / 370
+    DrawRect(0.0, 0.0+0.0125, 0.017+ factor, 0.03, 0, 0, 0, 75)
+    ClearDrawOrigin()
+end
+
+RegisterNetEvent("weapons:client:SyncRepairShops", function(NewData, key)
     Config.WeaponRepairPoints[key].IsRepairing = NewData.IsRepairing
     Config.WeaponRepairPoints[key].RepairingData = NewData.RepairingData
 end)
 
-RegisterNetEvent("weapons:client:EquipAttachment")
-AddEventHandler("weapons:client:EquipAttachment", function(ItemData, attachment)
+RegisterNetEvent("weapons:client:EquipAttachment", function(ItemData, attachment)
     local ped = PlayerPedId()
     local weapon = GetSelectedPedWeapon(ped)
     local WeaponData = QBCore.Shared.Weapons[weapon]
-
-    if weapon ~= GetHashKey("WEAPON_UNARMED") then
+    if weapon ~= `WEAPON_UNARMED` then
         WeaponData.name = WeaponData.name:upper()
-        if WeaponAttachments[WeaponData.name] ~= nil then
-            if WeaponAttachments[WeaponData.name][attachment] ~= nil then
+        if WeaponAttachments[WeaponData.name] then
+            if WeaponAttachments[WeaponData.name][attachment]['item'] == ItemData.name then
                 TriggerServerEvent("weapons:server:EquipAttachment", ItemData, CurrentWeaponData, WeaponAttachments[WeaponData.name][attachment])
             else
-                QBCore.Functions.Notify("This weapon does not support this attachment..", "error")
+                QBCore.Functions.Notify("This weapon does not support this attachment.", "error")
             end
         end
     else
-        QBCore.Functions.Notify("You dont have a weapon in your hand..", "error")
+        QBCore.Functions.Notify("You dont have a weapon in your hand.", "error")
     end
 end)
 
-RegisterNetEvent("addAttachment")
-AddEventHandler("addAttachment", function(component)
+RegisterNetEvent("addAttachment", function(component)
     local ped = PlayerPedId()
     local weapon = GetSelectedPedWeapon(ped)
     local WeaponData = QBCore.Shared.Weapons[weapon]
     GiveWeaponComponentToPed(ped, GetHashKey(WeaponData.name), GetHashKey(component))
 end)
 
-RegisterNetEvent('weapons:client:EquipTint')
-AddEventHandler('weapons:client:EquipTint', function(tint)
+RegisterNetEvent('weapons:client:EquipTint', function(tint)
     local player = PlayerPedId()
     local weapon = GetSelectedPedWeapon(player)
     SetPedWeaponTintIndex(player, weapon, tint)
