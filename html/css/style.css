@@ -1,0 +1,14 @@
+.Dot-Container {
+ display: none;
+}
+
+.Dot {
+ position: absolute;
+ left: 50%;
+ top: 50%;
+ height: 0.18vh;
+ width: 0.15vh;
+ background-color: #ffffffd7;
+ border: 1px solid rgb(0, 0, 0);
+ border-radius: 50px;
+}
