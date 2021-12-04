@@ -399,3 +399,26 @@ QBCore.Functions.CreateCallback('weapons:server:RemoveAttachment', function(sour
     end
 end)
 
+QBCore.Functions.CreateUseableItem('pistol_ammo', function(source, item)
+    TriggerClientEvent('weapon:client:AddAmmo', source, 'AMMO_PISTOL', 12, item)
+end)
+
+QBCore.Functions.CreateUseableItem('rifle_ammo', function(source, item)
+    TriggerClientEvent('weapon:client:AddAmmo', source, 'AMMO_RIFLE', 30, item)
+end)
+
+QBCore.Functions.CreateUseableItem('smg_ammo', function(source, item)
+    TriggerClientEvent('weapon:client:AddAmmo', source, 'AMMO_SMG', 20, item)
+end)
+
+QBCore.Functions.CreateUseableItem('shotgun_ammo', function(source, item)
+    TriggerClientEvent('weapon:client:AddAmmo', source, 'AMMO_SHOTGUN', 10, item)
+end)
+
+QBCore.Functions.CreateUseableItem('mg_ammo', function(source, item)
+    TriggerClientEvent('weapon:client:AddAmmo', source, 'AMMO_MG', 30, item)
+end)
+
+QBCore.Functions.CreateUseableItem('snp_ammo', function(source, item)
+    TriggerClientEvent('weapon:client:AddAmmo', source, 'AMMO_SNIPER', 10, item)
+end)
